@@ -8,10 +8,18 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y gcc g++ curl && rm -rf /var/lib/apt/lists/*
+
 # Copy requirements first (for cache optimization)
 COPY requirements.txt .
 
-# Install dependencies
+# Pre-install build dependencies for scikit-surprise
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install numpy==1.26.2 Cython && \
+    pip install scikit-surprise==1.1.3 --no-build-isolation
+
+# Install remaining dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
